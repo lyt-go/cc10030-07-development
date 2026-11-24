@@ -17,7 +17,7 @@ SEED_ROWS: dict[str, list[dict[str, Any]]] = {
   '采集水位': '定位源接入样例1',
   '批次校验值': '定位源接入样例1'},
  {'id': 2,
-  'status': '待校验',
+  'status': '待质检',
   'pending': True,
   'abnormal': True,
   '批次编号': 'GEO_-0002',

@@ -77,5 +77,25 @@ npm run dev
 - 列表接口统一返回 `{ items, total, page, size }`，动作接口统一返回 `{ ok, message }`。
 - 状态流转只允许在 `app/services` 里改，路由层不做业务判断。
 
+## 定位源质检区间与热力凭据流程
+
+`geo_source` 在采集登记之上提供按质检区间推进的可用状态流：
+
+```text
+草稿 → 待质检 → 可领取 →（撤回确认）待复验 →（另一位质检员独立复验）可领取 → 已接入
+```
+
+- 质检区间清单持久化在 `data/checkpoints/qc_manifest_<批次>.json`，观测点按时间戳
+  归属区间，可接入范围按实际观测覆盖计算（`compute_coverage`）。
+- 迟到观测开启新一轮质检：新覆盖区间进入「待复验」，已确认区间的结论持续有效；
+  复验人不得是此前在该批次做过确认的质检员。
+- `formal_onboard` 正式接入拒绝混用未经确认的区间（未观测/未核验一律拦截）。
+- `heatmap_aggregate` 只从已确认区间准备输入（`data/heatmap_input/`），交付时固化
+  一份逐点可读回的输入凭据（`data/heatmap_credentials/`，含内嵌点记录、逐点哈希、
+  快照与结果校验值）。
+- 批次后续补点或修订后，`recompute_from_credential` 仅凭据即可原点复算已交付统计，
+  不读取当前点文件；`reconcile_coverage` 核对可见空间覆盖、下一次待补算范围与旧结果
+  采用过的点。
+
 领域：数据工程
 子方向：数据分析与数据应用
